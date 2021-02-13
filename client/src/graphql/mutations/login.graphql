@@ -1,0 +1,8 @@
+mutation Login($name: String!, $password: String!) {
+  loginUser(options: { userName: $name, userPassword: $password }) {
+    msg
+    user {
+      ...RegularUser
+    }
+  }
+}
