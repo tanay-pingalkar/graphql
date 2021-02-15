@@ -1,8 +1,7 @@
-mutation Register($name: String!, $password: String!) {
-  createUser(options: { userName: $name, userPassword: $password }) {
-    msg
-    user {
-      ...RegularUser
-    }
+mutation Register($name: String!, $email: String!, $password: String!) {
+  createUser(
+    options: { userName: $name, userEmail: $email, userPassword: $password }
+  ) {
+    ...RegularUser
   }
 }

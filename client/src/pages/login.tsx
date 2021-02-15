@@ -2,13 +2,13 @@ import React from "react";
 import { Field, Form, Formik } from "formik";
 import Wrapper from "../components/wrapper";
 import MForm from "../components/form";
-import Sbutton from "../components/Sbutton";
 import { Button, useToast } from "@chakra-ui/react";
 import { useLoginMutation } from "../generated/graphql";
 import { inputError } from "../utils/inputError";
 import { useRouter } from "next/router";
 import { withUrqlClient } from "next-urql";
 import { qrql } from "../utils/urql";
+import { responseError } from "../utils/responseError";
 interface registerProps {}
 
 const Register: React.FC<registerProps> = ({}) => {
@@ -18,17 +18,15 @@ const Register: React.FC<registerProps> = ({}) => {
   return (
     <Wrapper>
       <Formik
-        initialValues={{ name: "", password: "" }}
+        initialValues={{ nameOrEmail: "", password: "" }}
         onSubmit={async (values, actions) => {
-          if (inputError(values, actions) != "ok") {
+          if (!inputError(values, actions)) {
             return null;
           }
           const registerRes = await Login(values);
           actions.setSubmitting(false);
-          if (registerRes.data.loginUser.msg === "error") {
-            actions.setErrors({
-              name: `password or user-name is wrong`,
-            });
+          if (!responseError(registerRes.data.loginUser.ErrorMsg, actions)) {
+            return null;
           } else if (registerRes.data.loginUser.user) {
             toast({
               title: "logged in ",
@@ -43,7 +41,7 @@ const Register: React.FC<registerProps> = ({}) => {
       >
         {(props) => (
           <Form>
-            <MForm name="name"></MForm>
+            <MForm name="nameOrEmail"></MForm>
             <MForm name="password" type="password"></MForm>
             <Button
               mt={4}

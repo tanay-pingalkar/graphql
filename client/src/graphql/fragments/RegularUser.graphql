@@ -1,4 +1,10 @@
-fragment RegularUser on User {
-  id
-  userName
+fragment RegularUser on userResponse {
+  ErrorMsg {
+    field
+    msg
+  }
+  user {
+    id
+    userName
+  }
 }

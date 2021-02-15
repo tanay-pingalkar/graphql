@@ -10,6 +10,7 @@ import { inputError } from "../utils/inputError";
 import { useRouter } from "next/router";
 import { withUrqlClient } from "next-urql";
 import { qrql } from "../utils/urql";
+import { responseError } from "../utils/responseError";
 interface registerProps {}
 
 const Register: React.FC<registerProps> = ({}) => {
@@ -19,17 +20,21 @@ const Register: React.FC<registerProps> = ({}) => {
   return (
     <Wrapper>
       <Formik
-        initialValues={{ name: "", password: "" }}
+        initialValues={{ name: "", email: "", password: "" }}
         onSubmit={async (values, actions) => {
-          if (inputError(values, actions) != "ok") {
+          values = {
+            name: values.name.trimEnd(),
+            email: values.email.trimEnd(),
+            password: values.password.trimEnd(),
+          };
+          if (!inputError(values, actions)) {
+            console.log(inputError(values, actions));
             return null;
           }
           const registerRes = await register(values);
           actions.setSubmitting(false);
-          if (registerRes.data.createUser.msg === "error") {
-            actions.setErrors({
-              name: `${values.name} username is already taken`,
-            });
+          if (!responseError(registerRes.data.createUser.ErrorMsg, actions)) {
+            return null;
           } else if (registerRes.data.createUser.user) {
             toast({
               title: "Account created.",
@@ -45,6 +50,7 @@ const Register: React.FC<registerProps> = ({}) => {
         {(props) => (
           <Form>
             <MForm name="name"></MForm>
+            <MForm name="email"></MForm>
             <MForm name="password" type="password"></MForm>
             <Button
               mt={4}
