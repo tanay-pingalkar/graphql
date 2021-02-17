@@ -1,37 +1,51 @@
-import { toast, Button } from "@chakra-ui/react";
-import { Formik, Form } from "formik";
-import router from "next/dist/next-server/lib/router/router";
-import React from "react";
-import Wrapper from "../components/wrapper";
-import { inputError } from "../utils/inputError";
-import MForm from "../components/form";
+import { Button } from "@chakra-ui/react";
+import { Form, Formik } from "formik";
 import { withUrqlClient } from "next-urql";
+import React, { useState } from "react";
+import MForm from "../components/form";
+import Wrapper from "../components/wrapper";
+import { useForgetPasswordMutation } from "../generated/graphql";
+import { inputError } from "../utils/inputError";
 import { qrql } from "../utils/urql";
 
 interface forgetPasswordProps {}
 
 const forgetPassword: React.FC<forgetPasswordProps> = ({}) => {
+  const [, forgetPassword] = useForgetPasswordMutation();
+  const [complete, setcomplete] = useState(false);
   return (
     <Wrapper>
       <Formik
         initialValues={{ email: "" }}
         onSubmit={async (values, actions) => {
-          alert(JSON.stringify(values));
+          if (!inputError(values, actions)) {
+            return null;
+          }
+
+          await forgetPassword(values);
+          setcomplete(true);
         }}
       >
-        {(props) => (
-          <Form>
-            <MForm name="email"></MForm>
-            <Button
-              mt={4}
-              colorScheme="teal"
-              isLoading={props.isSubmitting}
-              type="submit"
-            >
-              Submit
-            </Button>
-          </Form>
-        )}
+        {(props) =>
+          complete ? (
+            <h1>
+              if any account with the given email exist, you will get a link on
+              the given email, you can use to change password
+            </h1>
+          ) : (
+            <Form>
+              <MForm name="email"></MForm>
+              <Button
+                mt={4}
+                colorScheme="teal"
+                isLoading={props.isSubmitting}
+                type="submit"
+              >
+                Submit
+              </Button>
+            </Form>
+          )
+        }
       </Formik>
     </Wrapper>
   );

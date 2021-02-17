@@ -178,7 +178,7 @@ export class UserResolver {
   ): Promise<boolean> {
     const user = await em.findOne(Users, { userEmail: email });
     if (!user) {
-      return false;
+      return true;
     }
     const token = v4();
     await redisClient.set(
