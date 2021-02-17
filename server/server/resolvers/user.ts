@@ -198,24 +198,25 @@ export class UserResolver {
   async changePassword(
     @Arg("token") token: string,
     @Arg("newPassword") newPassword: string,
-    @Ctx() { em, redisClient }: MyContext
+    @Ctx() { em, redisClient, req }: MyContext
   ): Promise<userResponse> {
     const userId = await redisClient.get(FORGET_PASSWORD_KEY + token);
     if (!userId) {
       return {
-        msg: "error",
+        ErrorMsg: { field: "error", msg: "error" },
       };
     }
     let user = await em.findOne(Users, { id: parseInt(userId) });
     if (!user) {
       return {
-        msg: "error",
+        ErrorMsg: { field: "error", msg: "error" },
       };
     }
     user.userPassword = await argon2.hash(newPassword);
     await em.persistAndFlush(user);
+    await redisClient.del(FORGET_PASSWORD_KEY + token);
+    req.session!.userId = user.id;
     return {
-      msg: "password changed",
       user: user,
     };
   }

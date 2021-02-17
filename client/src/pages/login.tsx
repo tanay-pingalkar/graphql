@@ -2,7 +2,7 @@ import React from "react";
 import { Field, Form, Formik } from "formik";
 import Wrapper from "../components/wrapper";
 import MForm from "../components/form";
-import { Button, useToast } from "@chakra-ui/react";
+import { Button, Link, useToast } from "@chakra-ui/react";
 import { useLoginMutation } from "../generated/graphql";
 import { inputError } from "../utils/inputError";
 import { useRouter } from "next/router";
@@ -54,6 +54,7 @@ const Register: React.FC<registerProps> = ({}) => {
           </Form>
         )}
       </Formik>
+      <Link href="/forgetPassword">forget password</Link>
     </Wrapper>
   );
 };
