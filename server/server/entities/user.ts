@@ -1,30 +1,37 @@
-import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
 import { Field, ObjectType } from "type-graphql";
+import {
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from "typeorm";
 
 @ObjectType()
 @Entity()
-export class Users {
-  @Field(() => String, { nullable: true })
-  @PrimaryKey()
+export class Users extends BaseEntity {
+  @Field(() => String)
+  @PrimaryGeneratedColumn()
   id!: number;
 
-  @Field(() => String, { nullable: true })
-  @Property({ type: "date" })
-  createdAt = new Date();
+  @Field(() => String)
+  @CreateDateColumn()
+  createdAt = Date();
 
-  @Field(() => String, { nullable: true })
-  @Property({ type: "date", onUpdate: () => new Date() })
-  updatedAt = new Date();
+  @Field(() => String)
+  @UpdateDateColumn()
+  updatedAt = Date();
 
-  @Field(() => String, { nullable: true })
-  @Property({ type: "text", unique: true })
+  @Field(() => String)
+  @Column({ unique: true })
   userName!: string;
 
-  @Field(() => String, { nullable: true })
-  @Property({ type: "text" })
+  @Field(() => String)
+  @Column()
   userPassword!: string;
 
-  @Field(() => String, { nullable: true })
-  @Property({ type: "text", unique: true })
+  @Field(() => String)
+  @Column({ unique: true })
   userEmail!: string;
 }

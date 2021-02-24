@@ -2,7 +2,7 @@ import nodemailer from "nodemailer";
 import Mail from "nodemailer/lib/mailer";
 import internal from "stream";
 import dotenv from "dotenv";
-const l = dotenv.config();
+dotenv.config();
 
 // async..await is not allowed in global scope, must use a wrapper
 export const sendEmail = async (

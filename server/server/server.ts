@@ -14,13 +14,27 @@ import session from "express-session";
 import connectRedis from "connect-redis";
 import { MyContext } from "./utils/types";
 import cors from "cors";
+import { createConnection } from "typeorm";
+import dotenv from "dotenv";
+import { Post } from "./entities/post";
+import { Users } from "./entities/user";
+dotenv.config();
 
 const RedisStore = connectRedis(session);
 const redisClient = new ioRedis();
 
 const main = async () => {
-  const orm = await MikroORM.init(microConfig);
-  await orm.getMigrator().up();
+  console.log(process.env.DB_PASSWORD);
+  const connection = await createConnection({
+    type: "postgres",
+    database: "allData",
+    username: "postgres",
+    password: process.env.DB_PASSWORD,
+    logging: true,
+    synchronize: true,
+    entities: [Post, Users],
+  });
+
   const app = express();
 
   app.use(
@@ -55,7 +69,6 @@ const main = async () => {
       validate: false,
     }),
     context: ({ req, res }): MyContext => ({
-      em: orm.em,
       req,
       res,
       redisClient,

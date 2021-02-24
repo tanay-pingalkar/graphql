@@ -57,7 +57,7 @@ export class UserResolver {
   @Mutation(() => userResponse)
   async createUser(
     @Arg("options") options: userInput,
-    @Ctx() { em, req }: MyContext
+    @Ctx() { req }: MyContext
   ): Promise<userResponse> {
     const hashedPassword = await argon2.hash(options.userPassword);
     if (!ValidateEmail(options.userEmail)) {
@@ -68,11 +68,11 @@ export class UserResolver {
         },
       };
     }
-    const user = em.create(Users, {
+    const user = Users.create({
       userName: options.userName,
       userPassword: hashedPassword,
       userEmail: options.userEmail,
-    });
+    }).save();
     let res: userResponse = {};
     await em.persistAndFlush(user).catch((err) => {
       console.log(err);
@@ -198,22 +198,23 @@ export class UserResolver {
   async changePassword(
     @Arg("token") token: string,
     @Arg("newPassword") newPassword: string,
-    @Ctx() { em, redisClient, req }: MyContext
+    @Ctx() { redisClient, req }: MyContext
   ): Promise<userResponse> {
     const userId = await redisClient.get(FORGET_PASSWORD_KEY + token);
+    const userInt = parseInt(userId);
     if (!userId) {
       return {
         ErrorMsg: { field: "error", msg: "error" },
       };
     }
-    let user = await em.findOne(Users, { id: parseInt(userId) });
+    let user = await Users.findOne(userInt);
     if (!user) {
       return {
         ErrorMsg: { field: "error", msg: "error" },
       };
     }
     user.userPassword = await argon2.hash(newPassword);
-    await em.persistAndFlush(user);
+    await Users.update({ id: userInt }, user);
     await redisClient.del(FORGET_PASSWORD_KEY + token);
     req.session!.userId = user.id;
     return {
